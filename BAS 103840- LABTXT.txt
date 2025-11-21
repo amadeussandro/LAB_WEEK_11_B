@@ -1,0 +1,35 @@
+1. Bagian kode yang menangani penyimpanan foto berdasarkan URI:
+
+takePictureLauncher =
+    registerForActivityResult(ActivityResultContracts.TakePicture()) {
+        providerFileManager.insertImageToStore(photoInfo)
+    }
+
+
+Bagian ini yang memproses penyimpanan file ketika foto berhasil diambil. Kamera menulis ke URI sementara, lalu insertImageToStore() memindahkannya ke MediaStore.
+
+2. Penjelasan atribut pada FileInfo.kt:
+
+Atribut pertama – uri
+Merujuk pada URI sementara yang dibuat oleh FileProvider.
+Kamera menulis foto atau video ke URI ini sebelum dipindahkan ke MediaStore.
+
+Atribut keempat – relativePath
+Merujuk pada lokasi folder di MediaStore tempat file akan disimpan secara permanen.
+Contoh:
+
+Pictures/ untuk foto
+
+Movies/ untuk video
+
+3. Bonus – Urutan kronologis dari user mengambil foto sampai file tersimpan di MediaStore:
+
+-User menekan tombol Photo.
+- Aplikasi memeriksa apakah perlu izin WRITE_EXTERNAL_STORAGE (Android 9 ke bawah).
+- Aplikasi menjalankan fungsi openImageCapture().
+- Fungsi ini membuat URI sementara dengan generatePhotoUri().
+- Kamera dibuka melalui takePictureLauncher.launch(uri).
+- User mengambil foto → kamera menyimpan hasilnya ke URI sementara.
+- Setelah berhasil, callback menjalankan insertImageToStore(photoInfo).
+- ProviderFileManager menyalin file dari URI sementara ke MediaStore menggunakan ContentResolver.
+- File tersimpan permanen di galeri pada folder sesuai relativePath (misal: Pictures/).
